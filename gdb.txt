@@ -1,0 +1,380 @@
+=============================
+	2020/4/15
+=============================	
+
+用户都是放在组里面
+给用户权限或者给一个组赋予权限
+
+tty：是一个终端
+
+cat test.c |  wc -l
+wc -l:统计有多少行
+|:管道，单向流动
+C语言 《C程序设计语言》		
+
+mkfifo :p文件需要同时写同时读，需要两个终端正常情况下
+my.p : echo asd > my.p ,另一个终端同时在读cat my.p,才能正常运行
+echo就是向文件写入
+>>追加输出重定向
+>覆盖输出
+
+Linux不认后缀，编译C同样要认识文件
+
+umask:0:八进制文件
+
+权限改变：
+chmod a-r a.out
+改变某个用户组对某个文件操作的权限
+u g o a:+-=:rwx
+
+chmod 0740 a.txt
+
+修改权限：root
+或者文件拥有着
+
+
+创建默认权限 0666 同时受umask影响
+umask取反再按位&
+
+目录的权限
+r:表示可以ls,读的权限，看目录中的内容
+w:touch
+wx:cd , 不可ls
+
+实际用户：命令调用者
+有效用户：权限检验时检验的是有效用户，设置了用户设置位之后，有效用户就是命令的拥有着
+
+用户设置位：只针对可以执行文件有效；
+典型的是passwd
+实际用户不能执行，但是有效用户可执行
+访问是否可以成功看的是有效用户是否有权限
+程序执行检验权限的时候就是检验有效用户，并非检验实际用户
+chmod u+s exe:要对exe可执行文件才能加s(小s)
+[root@localhost bin]# ls -ld passwd
+-rwsr-xr-x. 1 root root 30768 11月 24 2015 passwd
+
+// chmod u+s passwd
+
+粘贴位：只针对目录有效,对上传文件起一个保护作用
+主要是防止人品不好的人/xixixi\
+防止Ctrl+x
+此时只有root和文件拥有着可以删除，其他不可删除
+ls -ld /
+
+chmod  o+t /:此时已设粘贴位对根文件
+自己可以删自己的内容，不可以删别人的，但是可以拷贝
+
+
+网络配置：
+1、查看网络状态
+ifconfig
+ 配置为eth0 (ens33改为eth0)
+
+ 第一块网卡： eth0
+ 	PIC-E 网卡
+ 网卡改名
+  biosdevname net.ifnames
+  /etc/default/grub
+
+  	BIOS：硬件自检 => grub（在此阶段可以改网卡，选OS,引导程序）=>OS kernel(初始化各种IO设备)
+  	=> shell
+
+
+CentOS 7 : =>eth0
+配置网络之改网卡名
+1 vim /etc/default/grub
+
+2、update grub
+grub2-mkconfig -o /boot/grub2/grub.cfg	
+3、重启
+init 6
+
+
+
+命令查看网卡连接是否正常
+mii-tool eth0 
+
+[root@localhost grub]# mii-tool eth0 
+eth0: negotiated 100baseTx-FD, link ok
+
+配置网关:
+查看网关 查看路由
+route -n
+
+修改IP
+man ifconfig
+ifconfig eht0
+ ifconfig eth0 192.168.144.100
+
+
+修改网关
+service network restart
+
+IPADDR=
+NETMASK=255
+GATEWAY=
+DNS1=
+ONBOOT=yes
+
+
+
+TYPE=Ethernet
+BOOTPROTO=static
+IPADDR=192.168.144.100
+NETMASK=255.255.255.0
+GATEWAY=192.168.144.1
+DNS1=114.114.114.114
+NAME=eth0
+UUID=d3feb00f-ed26-4720-b3d9-b65770df03dc
+DEVICE=eth0
+ONBOOT=yes
+
+
+Linux
+虚拟机网络
+windows
+
+
+2:15:58
+网络管理：
+1、查看网络状态 ifconfig
+	第一块网卡 eth0
+		PIC-E 网卡
+
+		PIC单片机
+		单片机，全称单片微型计算机（single-chip microcomputer）,是把中央处理器、存储器、定时/计数器(timer/counter)、各种输入输出接口等都集成电路芯片上的微型计算机。
+
+
+
+
+
+
+
+
+
+
+
+=============================
+	2020/4/16
+=============================
+
+软件安装、进程、内存、文件系统、磁盘管理
+
+
+回顾：
+网络配置
+用户设置位chmod o+s zhenghong
+pwd
+粘贴位： chmod o+t a.txt
+权限
+其中文件类型
+-ldbscp
+
+安装软件:
+软件包 CentOS rpm包（制作rpm包）
+
+mount:挂载
+
+将光盘挂载到/mnt中
+mount /dev/sr0 /mnt
+cd Packages:进入该文件夹中
+
+
+rpm -i 装软件
+rpm -e 卸载软件
+[root@localhost Packages]# cp vim-common-7.4.629-6.el7.x86_64.rpm ~/
+[root@localhost Packages]# cp vim-enhanced-7.4.629-6.el7.x86_64.rpm ~/
+
+软件依赖必须掌握好
+rpm -i
+rpm -e
+
+由于rpm包中的循环依赖
+因此成就了yum
+常用的软件包放在一个软件仓库里
+自动解决依赖关系 yum(依赖已经存在)
+yum install 安装软件
+yum remove 卸载软件
+yum list 查看软件
+
+机器一定要知道软件仓库在哪儿（网址）
+缺省的仓库在 国外
+国外的太慢
+国内镜像地址
+
+vim /etc/yum.repos.d/CentOS/
+
+https://developer.aliyun.com/mirror/
+
+
+// 安装过程
+https://developer.aliyun.com/mirror/centos?spm=a2c6h.13651102.0.0.3e221b11h11Rv7
+
+必须要备份:
+mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.backup
+更新yum源 仓库
+下载新的 CentOS-Base.repo 到 /etc/yum.repos.d/
+CentOS 6
+wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-6.repo
+
+yum makecache
+
+安装gcc
+yum  list | 
+cp /etc/passwd ~
+grep  "root" passwd:过滤
+grep -n "root" passwd:过滤,显示第几行
+
+yum list | grep gcc
+
+yum -y install gcc
+
+yum -y install gcc-c++
+
+yum -y install gdb：调试工具
+
+
+二进制安装
+源码安装
+
+yum list | grep mysql
+yum list | grep mariadb
+
+mysql数据库：
+wget http://dev.mysql.com/get/mysql57-community-release-el7-8.noarch.rpm
+
+yum localinstall mysql57-community-release-el7-8.noarch.rpm
+
+
+进程管理
+查看进程
+ps process status 
+ps : 只能看见当前终端上的进程
+OS合理管理进程，类似于链表
+画图->虚拟机->记事本：各个进程对应其中的软件
+strcmp():字符串比较进程比较慢
+因此每一个进程封一个号id
+每一个进程都有一个PID
+tty：查询进程运行终端
+/dev/pts/0
+
+ps -e:查出所有的进程
+
+[root@localhost ~]# ps -ef | head
+UID         PID   PPID  C STIME TTY          TIME CMD
+root          1      0  0 10:13 ?        00:00:12 /sbin/init
+root          2      0  0 10:13 ?        00:00:00 [kthreadd]
+root          3      2  0 10:13 ?        00:00:07 [migration/0]
+root          4      2  0 10:13 ?        00:00:00 [ksoftirqd/0]
+root          5      2  0 10:13 ?        00:00:00 [stopper/0]
+root          6      2  0 10:13 ?        00:00:00 [watchdog/0]
+root          7      2  0 10:13 ?        00:00:00 [migration/1]
+root          8      2  0 10:13 ?        00:00:00 [stopper/1]
+root          9      2  0 10:13 ?        00:00:00 [ksoftirqd/1]
+
+
+/*
+UID :用户id
+PID:进程号
+PPID:0为OS源码进程，进程parent,父进程
+*/
+
+[root@localhost ~]# ps -aux | head
+Warning: bad syntax, perhaps a bogus '-'? See /usr/share/doc/procps-3.2.8/FAQ
+USER        PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root          1  0.0  0.1  19356  1364 ?        Ss   10:13   0:12 /sbin/init
+root          2  0.0  0.0      0     0 ?        S    10:13   0:00 [kthreadd]
+root          3  0.0  0.0      0     0 ?        S    10:13   0:07 [migration/0]
+root          4  0.0  0.0      0     0 ?        S    10:13   0:00 [ksoftirqd/0]
+root          5  0.0  0.0      0     0 ?        S    10:13   0:00 [stopper/0]
+root          6  0.0  0.0      0     0 ?        S    10:13   0:00 [watchdog/0]
+root          7  0.0  0.0      0     0 ?        S    10:13   0:00 [migration/1]
+root          8  0.0  0.0      0     0 ?        S    10:13   0:00 [stopper/1]
+root          9  0.0  0.0      0     0 ?        S    10:13   0:00 [ksoftirqd/1]
+[root@localhost ~]# 
+
+
+pstree：可以打印出Linux中的进程树
+
+
+动态观察内存各部分使用情况进程
+top
+
+
+top - 20:00:31 up  9:46,  2 users,  load average: 0.22, 0.28, 0.34
+Tasks: 208 total,   1 running, 207 sleeping,   0 stopped,   0 zombie
+Cpu(s):  0.9%us,  0.8%sy,  0.0%ni, 98.2%id,  0.0%wa,  0.0%hi,  0.0%si,  0.0%st
+Mem:   1004136k total,   824396k used,   179740k free,    20100k buffers
+Swap:  1048572k total,     1776k used,  1046796k free,   419176k cached
+
+   PID USER      PR  NI  VIRT  RES  SHR S %CPU %MEM    TIME+  COMMAND                            
+  2648 root      20   0  216m  26m 8828 S  6.0  2.7   1:29.95 Xorg                               
+  3246 zhenghon  20   0  355m  19m  10m S  3.7  2.0   0:46.25 gnome-terminal                     
+  5946 root      20   0 15136 1312  936 R  0.7  0.1   0:00.20 top          
+
+
+
+
+
+
+mount /dev/sr0 /mnt:挂载光盘 ,将软件包放于指定位置
+cd Packages（该目录中放了很多rpm软件包）
+
+rpm -i ： 装软件
+
+
+
+=============================
+	2020/4/22
+=============================
+
+1、date
+date +%s：时间戳
+
+2、以时间戳命名日志文件
+touch `date +%s`.log
+date -d@时间戳：反推时间
+
+Linux 集群
+快照  
+3、cal
+显示日历
+
+4、find 路径 -name ".h"
+找哪一个目录下的.h文件
+
+5、grep
+在文件里过滤内容
+从指定文件夹中找到想要的函数
+// xargs 将fork作为参数放在find结果中过滤    
+find /etc/tmp/tmp -name ".c" | xargs grep "fork"
+
+6、打包压缩
+xxx.tar.gz
+tar -czvf xxx.tar.gz test.c // 压缩成当前文件夹
+file xxx.tar.gz
+
+tar -xzvf 解压
+
+7、bc
+大数运算
+Ctrl+d结束
+uname -a:查看系统版本
+
+8、gcc 编译工具
+编译的过程:
+
+预处理 gcc -E:之后就是纯净版的C语言
+编译 gcc -S ：将C语言代码转换为汇编代码
+	词法分析
+	语法分析:语法树
+	语义分析
+	中间代码优化:最难
+汇编：由汇编器翻译成机器码 -c
+	readelf
+	obbjdump -dS ***.o
+链接
+
+可执行文件格式
+windows:ELF
+Linux:PE
